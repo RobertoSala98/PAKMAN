@@ -82,5 +82,13 @@ $ cd PAKMAN
 $ docker build -t pakman .
 $ docker run --rm -v $(pwd):/PAKMAN -it pakman
 ```
+Notice that this procedure will work only on Unix based systems.
+
+If you want to avoid the installation, which would take more than 10 minutes, it is sufficient to pool the docker image:
+```bash
+$ cd PAKMAN
+$ docker pull robertosala/pakman
+$ docker run --rm -v $(pwd):/PAKMAN -it robertosala/pakman
+```
 
 ## Running PAKMAN
