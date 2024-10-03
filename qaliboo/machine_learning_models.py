@@ -62,7 +62,19 @@ class ML_model:
         '''
         Compute the nascent minima penalization.
         '''
-        return np.exp(-k*np.linalg.norm(self.predict(X)*error)/self._const)
+
+        ml_prediction = self.predict(X)
+        if self._X_lb is not None:
+            lower_diff = np.maximum(self._X_lb - ml_prediction, 0)
+        else:
+            lower_diff = np.zeros(ml_prediction.shape)
+        if self._X_ub is not None:
+            upper_diff = np.maximum(ml_prediction - self._X_ub, 0)
+        else:
+            upper_diff = np.zeros(ml_prediction.shape)
+        deviation = lower_diff + upper_diff
+
+        return np.exp(-k*np.linalg.norm(deviation*error)/self._const)
     
     def out_count(self, X): 
         '''

@@ -74,7 +74,6 @@ class PAKMAN:
 
         self._global_time=0
 
-        #initial_points_array = self._domain.generate_uniform_random_points_in_domain(n_initial_points)
         #initial_points_array= self._domain.sample_points_in_domain(n_initial_points)
         initial_points_array = self._domain.generate_uniform_random_points_in_domain(n_initial_points)
 
