@@ -76,6 +76,11 @@ development mode:
 $ python -m pip install -e .
 ```
 ## Installation with Docker
-If you want to install the library using Docker, download the dockerfile.
+If you want to install the library using Docker, once cloned the repository, follow this instructions:
+```bash
+$ cd PAKMAN
+$ docker build -t pakman .
+$ docker run --rm -v $(pwd):/PAKMAN -it pakman
+```
 
 ## Running PAKMAN
