@@ -215,11 +215,13 @@ class PAKMAN:
         ''' 
         init_point = np.array(self._domain.generate_uniform_random_points_in_domain(q))
         # Stocastic Gradient Ascent
+        """
         if self._objective_func.evaluation_count - self._n_initial_points > 50:
             self._error = 1.0
         else:
             self._error = 1.5 - 0.01*(self._objective_func.evaluation_count - self._n_initial_points)
-            self._error = 1.0
+        """
+        self._error = 1.0
 
         if self._use_ml:
             new_point = SA.simulated_annealing_ML(self._domain, kg, self._ml_model, init_point, 40, 3, 0.1)

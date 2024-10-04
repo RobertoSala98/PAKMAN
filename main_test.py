@@ -284,6 +284,35 @@ if objective_func_name=='XGBoostRegressor' or objective_func_name=='XGBoostBinar
 else:
     result_file = f'./results/{objective_func_name}_{datetime.datetime.now().strftime("%Y-%m-%d_%H%M")}.json'
 
+
+def optimize_point(seed):
+
+    np.random.seed(seed)
+    init_point = np.array(domain.generate_uniform_random_points_in_domain(n_points_per_iteration))
+    
+    if use_SA == False:
+        new_point=init_point
+    else:
+        new_point = SA.simulated_annealing(domain, kg, init_point, n_iter_sa, initial_temperature, 0.1)
+            
+    new_point = sga.stochastic_gradient(kg, domain, new_point)
+
+    kg.set_current_point(new_point)
+
+
+    identity = 1
+    
+    if nm==True:    
+        identity = identity*ml_model.nascent_minima_binary(new_point)
+    
+    if (ub is not None) or (lb is not None):
+        identity=identity*ml_model.exponential_penality(new_point, k=4)
+        
+    kg_value = kg.compute_knowledge_gradient_mcmc()*identity 
+    
+    return new_point, kg_value
+
+
 time0 = time.time()
 # Algorithm 1.2: Main Stage: For `s` to `N`
 for s in range(n_iterations):
@@ -360,34 +389,6 @@ for s in range(n_iterations):
     
     use_SA = False
 
-    def optimize_point(seed):
-
-        np.random.seed(seed)
-        init_point = np.array(domain.generate_uniform_random_points_in_domain(n_points_per_iteration))
-        
-        if use_SA == False:
-            new_point=init_point
-        else:
-            new_point = SA.simulated_annealing(domain, kg, init_point, n_iter_sa, initial_temperature, 0.1)
-                
-        new_point = sga.stochastic_gradient(kg, domain, new_point)
-
-        kg.set_current_point(new_point)
-
-
-        identity = 1
-        
-        if nm==True:    
-            identity = identity*ml_model.nascent_minima_binary(new_point)
-        
-        if (ub is not None) or (lb is not None):
-            identity=identity*ml_model.exponential_penality(new_point, k=4)
-            
-        kg_value = kg.compute_knowledge_gradient_mcmc()*identity 
-        
-        return new_point, kg_value
-
-
     seeds = np.random.randint(0, 10000, size=num_restarts)
     with ProcessPoolExecutor() as executor:                     #max_workers=5
         res = list(executor.map(optimize_point, seeds))
@@ -439,15 +440,15 @@ for s in range(n_iterations):
 
         ml_model.update(next_points, target)
     
-    time1 = time.time()
+    time2 = time.time()
 
     # UPDATE OF THE GP
     # > re-train the hyperparameters of the GP by MLE
     # > and update the posterior distribution of f
     gp_loglikelihood.add_sampled_points(sampled_points)
     gp_loglikelihood.train()
-    _log.info(f"Retraining the model takes {time.time() - time1} seconds")
-    time1 = time.time()
+    _log.info(f"Retraining the model takes {time.time() - time2} seconds")
+    time3 = time.time()
     global_time = time.time() - time0
     
     _log.info("\nIteration finished successfully!")
@@ -465,7 +466,7 @@ for s in range(n_iterations):
     _log.info(f'The evaluated minimum is {min_evaluated}')               
     _log.info(f"The suggested minimum is:\n {suggested_minimum}")    
     _log.info(f"Which has a cost of:\n {computed_cost}")
-    _log.info(f"Finding the suggested minimum takes {time.time() - time1} seconds")
+    _log.info(f"Finding the suggested minimum takes {time.time() - time3} seconds")
     _log.info(f'The target function was evaluated {objective_func.evaluation_count} times')
     
     unfeasible_point = ml_model.out_count(target)

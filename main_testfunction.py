@@ -482,15 +482,15 @@ for s in range(n_iterations):
     if use_ml==True:
         ml_model.update(next_points, target)
     
-    time1 = time.time()
+    time2 = time.time()
 
     # UPDATE OF THE GP
     # > re-train the hyperparameters of the GP by MLE
     # > and update the posterior distribution of f
     gp_loglikelihood.add_sampled_points(sampled_points)
     gp_loglikelihood.train()
-    _log.info(f"Retraining the model takes {time.time() - time1} seconds")
-    time1 = time.time()
+    _log.info(f"Retraining the model takes {time.time() - time2} seconds")
+    time3 = time.time()
     global_time = time.time() - time0
     
     _log.info("\nIteration finished successfully!")
@@ -508,7 +508,7 @@ for s in range(n_iterations):
     _log.info(f'The evaluated minimum is {min_evaluated}')               
     _log.info(f"The suggested minimum is:\n {suggested_minimum}")    
     _log.info(f"Which has a cost of:\n {computed_cost}")
-    _log.info(f"Finding the suggested minimum takes {time.time() - time1} seconds")
+    _log.info(f"Finding the suggested minimum takes {time.time() - time3} seconds")
     _log.info(f'The target function was evaluated {objective_func.evaluation_count} times')
     print(target)
     unfeasible_point = ml_model.out_count(target)

@@ -232,6 +232,39 @@ if known_minimum is not None:
 _log.info(f'The minimum in the domain is:\n{known_minimum}')
 
 
+def optimize_point(seed):
+
+        np.random.seed(seed)
+        init_point = np.array(domain.generate_uniform_random_points_in_domain(n_points_per_iteration))
+        new_point=init_point
+        #new_point = SA.simulated_annealing_ML(domain, kg, ml_model,init_point, n_iter_sa, initial_temperature, 0.01)
+        new_point = SA.simulated_annealing(domain, kg, init_point, n_iter_sa, initial_temperature, 0.001)
+        
+        new_point = sga.stochastic_gradient(kg, domain, new_point)
+
+        kg.set_current_point(new_point)
+        '''
+        if objective_func.evaluation_count - n_initial_points < 50:
+            error = 1.5 - 0.01*(objective_func.evaluation_count - n_initial_points)
+            print(error)
+        else:
+            error = 1
+        '''
+        error = 1
+        identity = 1
+
+        if nm==True:    
+            identity = identity*ml_model.nascent_minima(new_point, error)
+    
+        if (ub is not None) or (lb is not None):
+            #identity=identity*ml_model.identity(new_point)
+            identity=identity*ml_model.exponential_penality(new_point, 7, error)
+
+        kg_value = kg.compute_knowledge_gradient_mcmc()*identity 
+        
+        return new_point, kg_value
+
+
 for s in range(n_iterations):
     _log.info(f"{s}th iteration, "
               f"func={objective_func_name}, "
@@ -304,47 +337,14 @@ for s in range(n_iterations):
     report_point = []
     kg_list = []
     
-    
+    """
     if objective_func.evaluation_count - n_initial_points < 50:
             error = 1.5 - 0.01*(objective_func.evaluation_count - n_initial_points)
             #print(error)
     else:
         error = 1
-
-
-
-    def optimize_point(seed):
-
-        np.random.seed(seed)
-        init_point = np.array(domain.generate_uniform_random_points_in_domain(n_points_per_iteration))
-        new_point=init_point
-        #new_point = SA.simulated_annealing_ML(domain, kg, ml_model,init_point, n_iter_sa, initial_temperature, 0.01)
-        new_point = SA.simulated_annealing(domain, kg, init_point, n_iter_sa, initial_temperature, 0.001)
-        
-        new_point = sga.stochastic_gradient(kg, domain, new_point)
-
-        kg.set_current_point(new_point)
-        '''
-        if objective_func.evaluation_count - n_initial_points < 50:
-            error = 1.5 - 0.01*(objective_func.evaluation_count - n_initial_points)
-            print(error)
-        else:
-            error = 1
-        '''
-        error = 1
-        identity = 1
-
-        if nm==True:    
-            identity = identity*ml_model.nascent_minima(new_point, error)
-    
-        if (ub is not None) or (lb is not None):
-            #identity=identity*ml_model.identity(new_point)
-            identity=identity*ml_model.exponential_penality(new_point, 7, error)
-
-        kg_value = kg.compute_knowledge_gradient_mcmc()*identity 
-        
-        return new_point, kg_value
-
+    """
+    error = 1
 
     seeds = np.random.randint(0, 10000, size=num_restarts)
     with ProcessPoolExecutor() as executor:
@@ -449,7 +449,8 @@ for s in range(n_iterations):
     else: unfeasible_points = 0
     '''
     unfeasible_points = 0
-    global_time = global_time + max_time + 25
+    global_time = global_time + max_time + alg_time
+
     _log.info(f'Optimizer Time: {global_time}')
 
     #aux.save_execution_time([next_points_time], result_folder)

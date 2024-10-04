@@ -44,15 +44,15 @@ ub = 185000
 nm = True
 
 Baop = PAKMAN(n_initial_points=n_initial_points, 
-           n_iterations=n_iterations, 
-           batch_size=batch_size, 
-           objective_func=objective_func,
-           domain=objective_func,
-           objective_func_name=objective_func_name,  
-           ub=ub, 
-           nm=nm,
-           uniform_sample=True,
-           save=True)
+                n_iterations=n_iterations, 
+                batch_size=batch_size, 
+                objective_func=objective_func,
+                domain=objective_func,
+                objective_func_name=objective_func_name,  
+                ub=ub, 
+                nm=nm,
+                uniform_sample=True,
+                save=True)
 
 # 60 for LiGen (in teoria per 5)
 # 36 for StereoMatch (in teoria per 250)
