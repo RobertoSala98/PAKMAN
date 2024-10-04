@@ -150,6 +150,10 @@ def csv_testfunction(iteration, q, objective_func_name, minimum_evaluated,n_eval
         existing_df = pd.read_csv(result_file)
     else:
         existing_df = pd.DataFrame()
+        path = ""
+        for _ in result_file.split("/")[:-1]: path += _ + "/"
+        if not os.path.exists(path):
+            os.makedirs(path)
 
     # Concatena i dati esistenti con i nuovi dati
     updated_df = pd.concat([existing_df, new_data_df], ignore_index=True)
@@ -157,11 +161,6 @@ def csv_testfunction(iteration, q, objective_func_name, minimum_evaluated,n_eval
     # Salva il DataFrame aggiornato come file CSV
 
     updated_df.to_csv(result_file, index=False)
-
-
-
-
-
 
 '''
 def create_csv_init(file1, result_folder):

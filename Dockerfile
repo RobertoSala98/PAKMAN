@@ -52,6 +52,7 @@ ENV MOE_CMAKE_OPTS="-D MOE_PYTHON_INCLUDE_DIR=/opt/conda/envs/qaliboo/include/py
 # Compilare l'estensione Python
 RUN python setup.py build_ext
 RUN python -m pip install -e .
+RUN pip install xgboost
 
 # Aprire il terminale quando si avvia il contenitore
 CMD ["bash"]

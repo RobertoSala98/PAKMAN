@@ -55,14 +55,16 @@ class ML_model:
         self._y_data = np.concatenate([self._y_data, y_new], axis=0)
 
         self.model.fit(self._X_data, self._y_data)
+    
+    """
     def nascent_minima_binary(self, X, k=2):
         return np.exp(-k*np.linalg.norm(1-self.predict(X))/self._const)
+    """
     
     def nascent_minima(self, X, k=2, error=1):
         '''
         Compute the nascent minima penalization.
         '''
-
         ml_prediction = self.predict(X)
         if self._X_lb is not None:
             lower_diff = np.maximum(self._X_lb - ml_prediction, 0)

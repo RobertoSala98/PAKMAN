@@ -62,7 +62,7 @@ parser.add_argument('--sample_size', '-m', help='GP sample size (`M` parameter)'
 parser.add_argument('--upper_bound', '-ub', help='Upper Bound (ML model)', type=float, default=None)
 parser.add_argument('--lower_bound', '-lb', help='Lower Bound (ML model)', type=float, default=None)
 parser.add_argument('--nascent_minima', '-nm', help='Nascent Minima term (ML model)', type=bool, default=False)
-parser.add_argument('--unf_lb', '-lbb', help='Upper Bound (Unfeasible)', type=float, default=None)
+parser.add_argument('--unf_lb', '-lbb', help='Lower Bound (Unfeasible)', type=float, default=None)
 params = parser.parse_args()
 
 objective_func_name = params.problem
@@ -170,8 +170,8 @@ ub = params.upper_bound
 nm = params.nascent_minima
 if params.unf_lb is not None:
     unf_lb = params.unf_lb
-elif params.ub is not None:
-    unf_lb = params.ub
+elif lb is not None:
+    unf_lb = lb
 else:
     unf_lb = None
 cpp_domain = cppTensorProductDomain([ClosedInterval(objective_func.search_domain[i, 0], objective_func.search_domain[i, 1])
@@ -404,10 +404,10 @@ for s in range(n_iterations):
         identity = 1
         if use_ml==True:
             if nm==True:    
-                identity = identity*ml_model.nascent_minima_binary(new_point)
+                identity = identity*ml_model.nascent_minima(new_point)
             
             if (ub is not None) or (lb is not None):
-                identity=identity*ml_model.exponential_penality(new_point, k=4)
+                identity = identity*ml_model.exponential_penality(new_point, k=4)
                 
         kg_value = kg.compute_knowledge_gradient_mcmc()*identity 
         
