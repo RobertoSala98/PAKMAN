@@ -185,14 +185,18 @@ if use_ml == True:
                         X_ub=dub,
                         X_lb=lb) # Set this value if you are intrested in I(T(X) < X_ub)
 
-if nm == True: word = 'a3'
-else: word = 'a2'
-result_folder = aux.create_result_folder(f'results')
+if ub is not None and nm:
+    result_folder_ = f'synch_NM_and_UB_{dub}' 
+elif ub is not None:
+    result_folder_ = f'synch_UB_{dub}'
+elif nm:
+    result_folder_ = f'synch_NM_{dub}'
+
+result_folder = aux.create_result_folder(result_folder_)
 
 
 aux.csv_init(result_folder,initial_points_index, dat)
 aux.csv_history(result_folder,-1,initial_points_index, dat)
-
 
 initial_points = [data_containers.SamplePoint(pt,
                                               initial_points_value[num])
