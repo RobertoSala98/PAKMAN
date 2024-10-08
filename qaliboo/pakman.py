@@ -26,7 +26,7 @@ _log.setLevel(logging.DEBUG)
 class PAKMAN:
     def __init__(self, n_initial_points: int = 10, n_iterations: int = 30, batch_size:int = 4,
                  m_domain_discretization: int= 30, objective_func = None, domain=None, objective_func_name=None, lb: float=None, 
-                 ub: float=None, dub:float=None, nm:bool=False, uniform_sample:bool=True, n_restarts:int = 15, save:bool=False):
+                 ub: float=None, dub:float=None, nm:bool=False, uniform_sample:bool=True, n_restarts:int = 15, save:bool=False, timeout=0.0):
         """
         Initializes an instance of PAKMAN.
 
@@ -118,11 +118,11 @@ class PAKMAN:
         
         if self._save:
             if ub is not None and nm:
-                result_folder = f'./results_asynch/{objective_func_name}/{dub}/NM'
+                result_folder = f'./results_asynch/{objective_func_name}/{dub}/NM/timeout_{timeout}'
             elif ub is not None:
-                result_folder = f'./results_asynch/{objective_func_name}/{dub}/noNM'
+                result_folder = f'./results_asynch/{objective_func_name}/{dub}/noNM/timeout_{timeout}'
             elif nm:
-                result_folder = f'./results_asynch/{objective_func_name}/NM_noUB/{dub}'
+                result_folder = f'./results_asynch/{objective_func_name}/NM_noUB/{dub}/timeout_{timeout}'
 
             self._result_folder = aux.create_result_folder(result_folder)
             aux.csv_init(self._result_folder, initial_points_index, self._dat)
@@ -462,7 +462,6 @@ class PAKMAN:
             to_be_removed = []
             for proc in active_process:
                 if not proc.is_alive(): # Check the terminated process
-                    print("Process ended:", time.time())
                     res = queue.get()  # Save the result
                     if res is not None:
                         results.append(res)
@@ -493,7 +492,6 @@ class PAKMAN:
                 # Compute the minimum of the posterior distribution
                 suggested_minimum = self.find_suggested_minimum()
 
-                #self._global_time += time.time() - time1 + t_restart*(self._time_proportion-1) # real time
                 if t_restart > 0:
                     self._global_time += time.time() - time1 + t_restart*(self._time_proportion-1) # real time
                 else:
@@ -516,7 +514,7 @@ class PAKMAN:
                 _log.info("Iteration finished succesfully")
         
 
-            if self._global_time >= 5000000:
+            if self._global_time >= 5000:
                 _log.info(f"Global time reached. Optimization finished succesfully!")
                 break
     

@@ -57,7 +57,8 @@ Baop = PAKMAN(n_initial_points=n_initial_points,
            dub=dub,
            nm=nm,
            uniform_sample=True,
-           save=True)
+           save=True,
+           timeout=timeout)
 
 # 60 for LiGen (in teoria per 5)
 # 36 for StereoMatch (in teoria per 250)

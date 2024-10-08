@@ -461,6 +461,9 @@ for s in range(n_iterations):
     aux.csv_info(s,n_points_per_iteration, objective_func.evaluation_count,
                 global_time, unfeasible_points, mape_value, result_folder, error)
 
+    if global_time >= 5000:
+        break
+
 _log.info("\nOptimization finished successfully!")
 
 
