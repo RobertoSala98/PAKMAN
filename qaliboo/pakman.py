@@ -17,6 +17,7 @@ import multiprocessing
 from qaliboo import aux
 from qaliboo import simulated_annealing as SA 
 from sklearn.metrics import mean_absolute_percentage_error as mape
+import datetime
 
 logging.basicConfig(level=logging.NOTSET)
 _log = logging.getLogger(__name__)
@@ -116,9 +117,14 @@ class PAKMAN:
 
         
         if self._save:
-            if self._nm: word = 'NM'
-            else: word = 'NoNM'
-            self._result_folder = aux.create_result_folder(f'Query_async_{dub/1000}_{word}')
+            if ub is not None and nm:
+                result_folder = f'./results_asynch/{objective_func_name}/{dub}/NM'
+            elif ub is not None:
+                result_folder = f'./results_asynch/{objective_func_name}/{dub}/noNM'
+            elif nm:
+                result_folder = f'./results_asynch/{objective_func_name}/NM_noUB/{dub}'
+
+            self._result_folder = aux.create_result_folder(result_folder)
             aux.csv_init(self._result_folder, initial_points_index, self._dat)
             aux.csv_history(self._result_folder,-1,initial_points_index, self._dat)
     
@@ -401,12 +407,12 @@ class PAKMAN:
         if isinstance(result, tuple):
             poi_v, poi_i, poi_t = result
             fake_time = poi_t/self._time_proportion
-            time.sleep(fake_time)
+            time.sleep(fake_time/1000)
             queue.put((point, poi_v, poi_i))  
         else: queue.put((point, poi_v, None))
         return 
     
-    def async_optimization(self, t_restart, n_process, time_proportion=1):
+    def async_optimization(self, t_restart, n_process, time_proportion):
         '''
         Asyncronous Optimization.
 
@@ -448,17 +454,23 @@ class PAKMAN:
             
             # Simulate waiting time
             if t_restart > 0:
-                for _ in tqdm(range(t_restart), desc="Wait", unit="second"):
+                #print("Waiting time real", int(t_restart/self._time_proportion), "seconds")
+                for _ in tqdm(range(int(t_restart/self._time_proportion)), desc="Wait", unit="second"):
                     time.sleep(1)
                 #time.sleep(t_restart)
           
+            to_be_removed = []
             for proc in active_process:
                 if not proc.is_alive(): # Check the terminated process
+                    print("Process ended:", time.time())
                     res = queue.get()  # Save the result
                     if res is not None:
                         results.append(res)
                     del assigned_points[proc]   # Delete the inactive processes 
-                    active_process.remove(proc) 
+                    to_be_removed.append(proc)
+                    
+            for proc_ in to_be_removed:   
+                active_process.remove(proc_)
             
             # Get the points that are still in process
             points_in_process = [assigned_points[proc] for proc in active_process]
@@ -494,7 +506,7 @@ class PAKMAN:
                 # Logging the results of the iteration 
                 self.log_iteration_result(suggested_minimum, s, dimension, unfeasible_points, mape_value)
                 
-                # Save teh results
+                # Save the results
                 if self._save:
                     aux.csv_info(s,dimension, self._objective_func.evaluation_count,
                                 self._global_time, unfeasible_points, mape_value, self._result_folder, self._error) # add mape

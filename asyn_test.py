@@ -24,6 +24,7 @@ parser.add_argument('--domain_upper_bound', '-dub', help='Domain Upper Bound', t
 parser.add_argument('--lower_bound', '-lb', help='Lower Bound (ML model)', type=float, default=None)
 parser.add_argument('--nascent_minima', '-nm', help='Nascent Minima term (ML model)', type=bool, default=False)
 parser.add_argument('--timeout', '-t', help='Timeout for the optimization', type=int, default=0)
+parser.add_argument('--time_proportion', '-prop', help='Scaling for simulation time', type=int, default=1)
 params = parser.parse_args()
 
 objective_func_name = params.problem
@@ -40,7 +41,8 @@ lb = params.lower_bound
 ub = params.upper_bound
 nm = params.nascent_minima
 timeout = params.timeout
-#dub = params.domain_upper_bound
+time_proportion = params.time_proportion
+dub = params.domain_upper_bound
 num_processors = multiprocessing.cpu_count()
 print("Maximum number of available process", num_processors)
 
@@ -52,6 +54,7 @@ Baop = PAKMAN(n_initial_points=n_initial_points,
            objective_func_name=objective_func_name, 
            lb=lb, 
            ub=ub,
+           dub=dub,
            nm=nm,
            uniform_sample=True,
            save=True)
@@ -59,5 +62,5 @@ Baop = PAKMAN(n_initial_points=n_initial_points,
 # 60 for LiGen (in teoria per 5)
 # 36 for StereoMatch (in teoria per 250)
 # 33 for StereoMatch10 (in teoria per 3)
-Baop.async_optimization(timeout, n_points_per_iteration) # Cambia il time
+Baop.async_optimization(timeout, n_points_per_iteration, time_proportion) # Cambia il time
 #Baop.sync_optimization()
